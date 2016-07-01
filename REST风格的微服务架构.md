@@ -117,6 +117,7 @@ Docker 和 Docker-compose
 
 [Docker —— 从入门到实践](https://yeasy.gitbooks.io/docker_practice/content/)
 [Python 开发者的 Docker 之旅](http://docs.daocloud.io/python-docker)
+[Docker-compose](https://docs.docker.com/compose/overview/)
 
 ### 构建镜像
 
@@ -126,17 +127,31 @@ Docker 在构建过程中会把同目录中的所有 .dockerignore 和 Dockerfil
 ### 每个容器一个程序
 
 将应用解耦合到不同的容器中，每个进程一个容器。即应用，数据库，Nginx反向代理等等都放在不同的容器中。
-处理相互依赖的容器时，使用容器的关联特性，而不是将它们直接放在同一个Docker容器里。
+
+处理相互依赖的容器时，使用 docker-compose 的[Networking in Compose](https://docs.docker.com/compose/networking/)，而不是将它们直接放在同一个Docker容器里。
 
 ### 容器和数据分离
 
 Docker容器可以随时关闭，销毁，重启，而应用程序中的数据（数据库，日志等等）需要永久保存。VOLUME 通常用作数据卷（类似于共享文件夹，实际数据储存在主机上），在容器启动的时候挂载，用于在主机和容器间共享数据。
 
-
 ### 部署
 
 使用 docker-compose.yml 定义容器的依赖关系，以及开放的端口，使用的数据卷。
 用 docker-compose 可以一个命令启动所有需要的容器，即一键部署。
+
+容器中文件大致结构：
+
+    /data
+      error.log
+      ...
+    /code
+      .git
+      Dockerfile
+      docker-compose.yml
+      ...
+
+data 目录中是数据，映射到主机的一个目录。code 目录中是代码，在构建镜像的会把代码拷贝进去。
+使用 `docker-compose up` 启动容器。
 
 
 ## 服务管理中心
