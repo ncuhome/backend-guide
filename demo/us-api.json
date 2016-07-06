@@ -59,6 +59,10 @@
             "username?str(4,16)&escape": "用户名"
         }
     },
+    "$error": {
+        "InvalidData": "请求参数不对",
+        "PermissionDeny": "权限不足",
+    },
     "user": {
         "$desc": "用户",
         "delete": {
@@ -119,7 +123,10 @@
                 "remember_me?bool&default=false": "记住密码",
                 "username?str": "用户名/邮箱/学号",
             },
-            "$output": "@user"
+            "$output": "@user",
+            "$error": {
+                "LoginFailed": "登录失败"
+            }
         },
         "post_migrate": {
             "$desc": "迁移到新US，成功后会发送注册链接到邮箱",

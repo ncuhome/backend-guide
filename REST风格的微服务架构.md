@@ -1,10 +1,11 @@
 # REST风格的微服务架构
 
-1. URL和参数标准化
-2. 元数据和文档
-3. 权限标准化
-4. 部署标准化
-5. 服务管理中心
+0. URL和参数标准化
+0. 响应格式标准化
+0. 元数据和文档
+0. 权限标准化
+0. 部署标准化
+0. 服务管理中心
 
 
 ## URL和参数标准化
@@ -25,6 +26,21 @@ Action描述的是对一类资源的操作，通常是GET, POST, PUT, DELETE...�
 
 请求参数来源取决于HTTP方法，GET和DELETE请求，取自url参数，
 POST和PUT请求，取自请求体，Content-Type为 `application/json`。
+
+
+## 响应格式标准化
+
+用HTTP状态码表示请求状态，通常：请求成功200,权限问题403,服务器错误500,业务逻辑问题400。前端根据HTTP状态码判断请求是成功还是失败。
+
+请求成功结果的JSON格式是固定的（在文档中说明），请求失败需要返回错误信息。错误信息包含2部分，一部分是给程序使用的（用于判断具体的错误），一部分是给用户看的（提示用户）。 
+
+    {
+        “error": "ErrorCode", 
+        "message": "提示用户的信息"
+    } 
+
+错误码不要用数字，可读性太差了。用大驼峰形式的字符串，例如：InvalidData,Timeout,UserAlreadyExisted。
+并在文档中说明错误码的含义。
 
 
 ## 元数据和文档
@@ -59,11 +75,19 @@ POST和PUT请求，取自请求体，Content-Type为 `application/json`。
             "name": "Schema",
             ...
         },
+        "$error": {
+            "ErrorCode": "通用错误码的含义",
+            ...
+        },
         "Resource":{
             "Action":{
                 "$desc":"简介",
                 "$input":"输入Schema",
-                "$output":"输出Schema"
+                "$output":"输出Schema",
+                "$error":{
+                    "ErrorCode": "错误码的含义",
+                    ...
+                }
             },
             ...
         },
