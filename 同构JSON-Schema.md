@@ -1,4 +1,5 @@
-# 同构JSON-Schema
+# 同构JSON-Schema(Isomorph-JSON-Schema)
+
 
 > “程序写出来是给人看的，附带能在机器上运行。”
 > <div style="text-align:right">《计算机程序的结构与解释》的卷首语</div>
@@ -116,21 +117,24 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
 因为Schema和JSON数据是同构的，所以这3种结构都需要是自己描述自身，即：
 
-映射结构用特殊的key描述自身，其余key描述对象里的内容：
+映射结构用特殊的key描述自身，其余key描述字典里的内容：
 
 	{
 		"$self": "ValidaterString",
 		"key": "value"
 	}
 
-序列结构用第一个元素描述自身，第二个元素描述数组里的内容：
+序列结构用第一个元素描述自身，第二个元素描述列表里的内容：
 
 	["ValidaterString", Item]
+
+序列结构也可以省略第一个元素，即只描述列表里的内容，不描述自身。
+
+    [Item]
 
 标量结构用字符串描述自身：
 
 	"ValidaterString"
-
 
 下面来用一下新语法
 
@@ -149,7 +153,7 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
     	"$self":"&desc=\"A product from Acme's catalog\""
         "id": "int&desc=\"The unique identifier for a product\"",
         "name": "str&desc=\"Name of the product\"",
-        "price": "float&min=0&emin&desc=\"价格\"",
+        "price": "float&min=0&exmin&desc=\"价格\"",
         "tags": ["&minlen=1&unique", "str&desc=\"标签\""]
     }
 
@@ -161,7 +165,7 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 		"$self": "A product from Acme's catalog",
         "id？int": "The unique identifier for a product",
         "name?str": "Name of the product",
-        "price?float&min=0&emin": "价格",
+        "price?float&min=0&exmin": "价格",
         "tags": ["&minlen=1&unique", "str&desc=\"标签\""]
     }
 
@@ -183,7 +187,7 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
     }
 
 
-**前置描述和自描述**
+**前置描述(pre-described)和自描述(self-described)**
 
 前面提到序列结构只能用自描述，否则会有歧义，映射结构也只能用自描述。
 因为如果序列结构和映射结构如果可以用前置描述，那就可能写出同时用了前置描述和自描述的Schema，会造成歧义，如果规定前置描述和自描述的优先级，虽然能避免歧义，但使语法复杂了。所以规定序列结构和映射结构只能用自描述。
@@ -229,8 +233,8 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
     int(min=-math.inf, max=math.inf, default=null, optional=false)
 
-    # emin:是否不包括最小值, emax:是否不包括最大值
-    float(min=-math.inf, max=math.inf, emin=false, emax=false, default=null, optional=false)
+    # exmin:是否不包括最小值, exmax:是否不包括最大值
+    float(min=-math.inf, max=math.inf, exmin=false, exmax=false, default=null, optional=false)
 
     # 时间格式为ISO8601，与JSON标准一致
     date(format="%Y-%m-%d", default=null, optional=false)
@@ -238,6 +242,8 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
     str(minlen=0, maxlen=1024*1024, escape=false, default=null, optional=false)
 
+    enum(items, default=null, optional=false)
+    
     email(default=null, optional=false)
     phone(default=null, optional=false)
     ipv4(default=null, optional=false)

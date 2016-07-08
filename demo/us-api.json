@@ -78,7 +78,7 @@
         "get_list": {
             "$desc": "获取用户列表，可以通过查询参数进行过滤，参数为空表示不限制",
             "$input": {
-                "$self": "@paging",
+                "$self@paging": "分页",
                 "college?str&optional": "学院",
                 "department?department&optional": "部门",
                 "hometown?str&optional": "籍贯",
