@@ -3,7 +3,7 @@
 > “程序写出来是给人看的，附带能在机器上运行。”
 > <div style="text-align:right">《计算机程序的结构与解释》的卷首语</div>
 
-## 同构JSON-Schema与JSON-Schema比较
+同构JSON-Schema是与JSON-Schema类似的，用来描述JSON数据的语法和校验JSON数据的工具。这种语法最大的特点就是Schema与实际JSON数据的结构完全相同，并且语法尽可能简洁，从Schema可以直观的看出实际数据的结构。
 
 ### JSON-Schema
 
@@ -63,15 +63,21 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
 ### 同构JSON-Schema的语法
 
-在去年大概10月份，我开始做一个功能和JSON-Schema类似的，用来描述JSON数据的语法和校验JSON数据的工具，这种语法最大的特点就是Schema与实际JSON数据的结构完全相同，并且语法尽可能简洁。
+[JSON](http://json.org/json-zh.html)有3种结构：映射，序列，标量。
+
+[数据类型和Json格式-阮一峰](http://www.ruanyifeng.com/blog/2009/05/data_types_and_json.html)
+> 从结构上看，所有的数据（data）最终都可以分解成三种类型：
+
+> 第一种类型是标量（scalar），也就是一个单独的字符串（string）或数字（numbers），比如"北京"这个单独的词。
+
+> 第二种类型是序列（sequence），也就是若干个相关的数据按照一定顺序并列在一起，又叫做数组（array）或列表（List），比如"北京，上海"。
+
+> 第三种类型是映射（mapping），也就是一个名/值对（Name/value），即数据有一个名称，还有一个与之相对应的值，这又称作散列（hash）或字典（dictionary），比如"首都：北京"。
 
 
-下面推导出这种语法：
+如果用一种通用的方式同时描述3种结构，这种方式只有**函数**。
 
-[JSON](http://json.org/json-zh.html)有3种结构：对象，数组，值。
-
-需要用一种通用的方式同时描述3种结构，这种方式只有**函数**，但大多数情况下不需要完整定义
-一个函数，因为这些函数都是类似的，只要用一个更高阶的函数生成校验函数。
+但大多数情况下不需要完整定义一个函数，因为这些函数都是类似的，只要用一个更高阶的函数生成校验函数。
 
 	# 高阶函数
 	def generate_validater(*args, **kwargs):
@@ -101,7 +107,7 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
 	"validater(arg1,arg2)&key1&key2=value"
 
-这种格式类似于URL里面的QueryString，可以取名为ValidaterString，其中：
+这种格式类似于URL里面的QueryString，可以取名为**ValidaterString**，其中：
 
 - arg1, arg2...value都是有效JSON值，即true/false是小写的，空值为null，字符串要加双引号。
 - 如果validater是dict或list，可以省略，因为可以从JSON结构看出是dict还是list。
@@ -110,18 +116,18 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
 因为Schema和JSON数据是同构的，所以这3种结构都需要是自己描述自身，即：
 
-对象用特殊的key描述自身，其余key描述对象里的内容：
+映射结构用特殊的key描述自身，其余key描述对象里的内容：
 
 	{
 		"$self": "ValidaterString",
 		"key": "value"
 	}
 
-数组用第一个元素描述自身，第二个元素描述数组里的内容：
+序列结构用第一个元素描述自身，第二个元素描述数组里的内容：
 
 	["ValidaterString", Item]
 
-值用字符串描述自身：
+标量结构用字符串描述自身：
 
 	"ValidaterString"
 
@@ -149,39 +155,70 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
 
 可以看到比原来的简洁了不少，主要不足是&desc的值是字符串且比较长，再次改进一下。
 
-在JSON对象结构中，可以在上层描述下一层，即前置描述：
+在映射结构中，可以在上层描述下一层，即前置描述：
 
 	{
 		"$self": "A product from Acme's catalog",
         "id？int": "The unique identifier for a product",
         "name?str": "Name of the product",
         "price?float&min=0&emin": "价格",
-        "tags?&minlen=1&unique": ["str&desc=\"标签\""]
+        "tags": ["&minlen=1&unique", "str&desc=\"标签\""]
     }
 
-这里用？分隔key和ValidaterString，另外tags里面只需要一个元素了。
-可以看到简洁多了，并且因为是同构的，从Scheme可以直接看出实际数据的结构。
+这里用？分隔key和ValidaterString，$self和标量都是前置描述。
+注意tags是序列结构，为了避免歧义（后面说明）只能用自描述。
 
 
 **引用**
 
-不同的Schema可能含有相同的部分，假设有一个公共的Schema，其他Schema需要包含或继承它，
-并添加或覆盖公共Schema中的部分结构，可以使用引用语法。
+不同的Schema可能含有相同的部分，假设有一个公共的Schema，其他Schema需要引用它，可以使用引用语法。
 
-    # override: 覆盖，addition：添加
-    # 自描述
+    # 直接引用
+    "@shared"
+
+    # 在映射结构中可以添加新内容
     {
-        "key": "@shared(override_arg1, arg2)&override_k=v",
+        "$self@shared": "desc",
         "addition_key": ...
     }
-    # 前置描述
-    {
-        "key@shared(override_arg1, arg2)&override_k=v": "override_desc",
-        "addition_key?...": ...
+
+
+**前置描述和自描述**
+
+前面提到序列结构只能用自描述，否则会有歧义，映射结构也只能用自描述。
+因为如果序列结构和映射结构如果可以用前置描述，那就可能写出同时用了前置描述和自描述的Schema，会造成歧义，如果规定前置描述和自描述的优先级，虽然能避免歧义，但使语法复杂了。所以规定序列结构和映射结构只能用自描述。
+
+如果考虑所有的情况，只有 $self, key-标量, key-引用 这三个地方用前置描述，其他地方都是自描述。
+
+即：
+
+    "int&default=0"  # 自描述
+
+    ["&minlen=1", "int&default=0"]  # 自描述
+
+    {  # 自描述
+        "$self?&optional": "desc",  # 前置描述
+        "key?int&default=0": "desc",  # 前置描述
+        "key": ["&minlen=1", "int&default=0"],  # 自描述
+        "key": {  # 自描述
+            "$self?&optional": "desc"
+        }
+    }
+
+    "@shared"  # 自描述
+
+    ["&minlen=1", "@shared"]  # 自描述
+
+    {  # 自描述
+        "$self@shared": "desc",  # 前置描述
+        "key@shared": "desc",  # 前置描述
+        "key": {  # 自描述
+            "$self@shared": "desc"
+        }
     }
 
 
-## 内置的校验函数
+### 内置的校验函数
     
     # 所有布尔型默认值都是false
     list(minlen=0, maxlen=1024*1024, unique=false, default=null, optional=false)
@@ -209,11 +246,11 @@ JSON Schema was an Internet Draft, most recently version 4, which expired on Aug
     password(minlen=6, maxlen=16, default=null, optional=false)
 
 
-## 例子
+### 例子
 
-	新US的API: us-api.json
+	demo中新US的API: us-api.json
 
-## 其他
+### 其他
 
 [Validater](https://github.com/guyskk/validater)经过几次较大的改变，语法基本达到目标。
 以上语法是今年暑假打算实现的。
