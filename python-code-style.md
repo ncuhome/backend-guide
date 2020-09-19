@@ -2,7 +2,7 @@
 
 ## 编码风格
 
-编码风格统一遵守PEP8规范，可参考[<译> PEP8-Python 编码风格指南](http://drafts.damnever.com/2015/EPE8-style-guide-for-python-code.html)。
+编码风格统一遵守PEP8规范，可参考[<译> PEP8-Python 编码风格指南](https://china-testing.github.io/python_pep8.html)。
 
 **提示:**
 
