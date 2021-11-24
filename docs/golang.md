@@ -6,7 +6,6 @@
 
 ---  
 
-[TOC]
 
 ## 1.写在前面
 
@@ -21,6 +20,7 @@
 
 
 本文档参考了 [Google Golang 代码规范](https://github.com/golang/go/wiki/CodeReviewComments) 并进行了一些调整
+更多可参考 [Uber go 规范](https://github.com/xxjwxc/uber_go_guide_cn) 
 
 ## 2.整体风格
 
