@@ -191,9 +191,12 @@
 
     // 家园各个时期的最大人数
     const (
-        NcuhomeMaxPeople2018 = "50" // 家园2018年的最大人数
-        NcuhomeMaxPeople2019 = "50" // 家园2019年的最大人数
-        NcuhomeMaxPeople2020 = "50" // 家园2020年的最大人数
+        // 家园2018年的最大人数
+        NcuhomeMaxPeople2018 = "50" 
+        // 家园2019年的最大人数
+        NcuhomeMaxPeople2019 = "50" 
+        // 家园2020年的最大人数
+        NcuhomeMaxPeople2020 = "50" 
     )
 
     // FullName 返回指定用户名的完整名称
